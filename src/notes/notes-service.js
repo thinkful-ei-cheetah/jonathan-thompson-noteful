@@ -1,24 +1,24 @@
 const NotesService = {
-    getAllBookmarks(knex) {
-        found = knex.select('*').from('bookmarks');
+    getAllNotes(knex) {
+        found = knex.select('*').from('notes');
         return found
     },
-    insertBookmark(knex, insertBookmark) {
-        return knex.insert(insertBookmark).into('bookmarks');
+    insertNote(knex, insertNote) {
+        return knex.insert(insertNote).into('notes');
     },
-    patchBookmark(knex, patchBookmark) {
-        return knex('bookmarks').where('id', patchBookmark.id).update(patchBookmark);
+    patchNote(knex, patchNote) {
+        return knex('notes').where('id', patchNote.id).update(patchNote);
     },
-    deleteBookmark(knex, id){
-        return knex('bookmarks')
+    deleteNote(knex, id){
+        return knex('notes')
         .where('id', id)
         .del()
     },
-    updateBookmark(knex, insertBookmark){
+    updateNote(knex, insertNote){
 
     },
-    getBookmarkById(knex, id) {
-       const found = knex.from('bookmarks').select('*').where('id', id).first()
+    getNoteById(knex, id) {
+       const found = knex.from('notes').select('*').where('id', id).first()
        return found
     }
   }

@@ -3,28 +3,28 @@ const uuid = require('uuid/v4');
 const logger = require('../logger');
 const notesRouter = express.Router();
 const bodyParser = express.json();
-const BookmarksService = require('./notes-service')
+const NotesService = require('./notes-service')
 
-const serializeBookmark = bookmark => ({
-  id: bookmark.id,
-  title: bookmark.title,
-  url: bookmark.url,
-  description: bookmark.description,
-  rating: Number(bookmark.rating),
+const serializeNote = note => ({
+  id: note.id,
+  title: note.title,
+  url: note.url,
+  description: note.description,
+  rating: Number(note.rating),
 })
 
 foldersRouter
-  .route('/api/bookmarks')
+  .route('/api/notes')
   .get((req, res, next) => {
       const knexInstance = req.app.get('db')
 
-      BookmarksService.getAllBookmarks(knexInstance)
-        .then(bookmarks => {
-         res.json(bookmarks.map(bookmark=> ({
-           id: bookmark.id,
-           title: bookmark.title,
-           url: bookmark.url,
-          description: bookmark.description,
+      NotesService.getAllNotes(knexInstance)
+        .then(notes => {
+         res.json(notes.map(note=> ({
+           id: note.id,
+           title: note.title,
+           url: note.url,
+          description: note.description,
         
          })))
         })
@@ -49,7 +49,7 @@ foldersRouter
         .send('Invalid Data');
     }
 
-    const insertBookmark = {
+    const insertNote = {
       title: title,
       rating: rating,
       url: url,
@@ -58,7 +58,7 @@ foldersRouter
 
     const knexInstance = req.app.get('db')
 
-    BookmarksService.insertBookmark(knexInstance, insertBookmark)
+    NotesService.insertNote(knexInstance, insertNote)
       .then(returnObject => {
           return res.json(returnObject)
       })
@@ -66,16 +66,16 @@ foldersRouter
   })
 
   foldersRouter
-    .route('/api/bookmarks/:id')
+    .route('/api/notes/:id')
     .get((req, res, next) => {
       const { id } = req.params;
       const parseId = parseInt(id);
 
       const knexInstance = req.app.get('db')
     
-      BookmarksService.getBookmarkById(knexInstance, id)
+      NotesService.getNoteById(knexInstance, id)
       .then(returnObject => {
-          return res.json(serializeBookmark(returnObject))
+          return res.json(serializeNote(returnObject))
       })
       .catch(next)
       
@@ -84,15 +84,15 @@ foldersRouter
       const { id } = req.params;
       const knexInstance = req.app.get('db')
 
-      BookmarksService.deleteBookmark(knexInstance, id)
+      NotesService.deleteNote(knexInstance, id)
       .then(returnObject => {
-          return res.json(serializeBookmark(returnObject))
+          return res.json(serializeNote(returnObject))
       })
       .catch(next)
     })
 
     foldersRouter
-    .route('/api/bookmarks/:id')
+    .route('/api/notes/:id')
     .patch(bodyParser, (req, res, next) => {
       console.log(req.body)
       const { id, title, url, rating, description } = req.body;
@@ -100,7 +100,7 @@ foldersRouter
       const parseId = parseInt(id);
       const knexInstance = req.app.get('db');
     
-      const patchBookmark = {
+      const patchNote = {
         title: title,
         rating: rating,
         url: url,
@@ -108,7 +108,7 @@ foldersRouter
         id: id
       }
 
-      BookmarksService.patchBookmark(knexInstance, patchBookmark)
+      NotesService.patchNote(knexInstance, patchNote)
       .then(returnObject => {
           return res.json(returnObject)
       })

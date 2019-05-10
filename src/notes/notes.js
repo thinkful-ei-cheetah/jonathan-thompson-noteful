@@ -3,118 +3,114 @@ const uuid = require('uuid/v4');
 const logger = require('../logger');
 const notesRouter = express.Router();
 const bodyParser = express.json();
-const BookmarksService = require('./notes-service')
+const NotesService = require('./notes-service')
 
-const serializeBookmark = bookmark => ({
-  id: bookmark.id,
-  title: bookmark.title,
-  url: bookmark.url,
-  description: bookmark.description,
-  rating: Number(bookmark.rating),
+const serializeNote = note => ({
+  id: note.id,
+  folderId: note.folderId,
+  description: note.description,
+  content: Number(note.content),
 })
 
 notesRouter
-  .route('/api/bookmarks')
+  .route('/api/notes')
   .get((req, res, next) => {
-      const knexInstance = req.app.get('db')
+    const knexInstance = req.app.get('db')
 
-      BookmarksService.getAllBookmarks(knexInstance)
-        .then(bookmarks => {
-         res.json(bookmarks.map(bookmark=> ({
-           id: bookmark.id,
-           title: bookmark.title,
-           url: bookmark.url,
-          description: bookmark.description,
-        
-         })))
-        })
-        .catch(next)
+    NotesService.getAllNotes(knexInstance)
+      .then(notes => {
+        res.json(notes.map(note => ({
+          id: note.id,
+          folderId: note.folderId,
+          content: note.content,
+          modified: note.modified,
+
+        })))
+      })
+      .catch(next)
 
   })
   .post(bodyParser, (req, res, next) => {
-   
-    const { title, url, rating, description } = req.body;
-    const parsedRating = parseInt(rating);
 
-    if(!title) {
-      logger.error('Title is required')
+    const { folderId, content, modified } = req.body;
+    const parsedContent = parseInt(content);
+
+    if (!folderId) {
+      logger.error('folderId is required')
       return res
         .status(400)
         .send('Invalid Data');
     }
-    if(!rating) {
-      logger.error('Rating is required')
+    if (!content) {
+      logger.error('content is required')
       return res
         .status(400)
         .send('Invalid Data');
     }
 
-    const insertBookmark = {
-      title: title,
-      rating: rating,
-      url: url,
-      description: description
+    const insertNote = {
+      folderId: folderId,
+      content: content,
+      modified: now()
     }
 
     const knexInstance = req.app.get('db')
 
-    BookmarksService.insertBookmark(knexInstance, insertBookmark)
+    NotesService.insertNote(knexInstance, insertNote)
       .then(returnObject => {
-          return res.json(returnObject)
+        return res.json(returnObject)
       })
       .catch(next)
   })
 
-  notesRouter
-    .route('/api/bookmarks/:id')
-    .get((req, res, next) => {
-      const { id } = req.params;
-      const parseId = parseInt(id);
+notesRouter
+  .route('/api/notes/:id')
+  .get((req, res, next) => {
+    const { id } = req.params;
+    const parseId = parseInt(id);
 
-      const knexInstance = req.app.get('db')
-    
-      BookmarksService.getBookmarkById(knexInstance, id)
+    const knexInstance = req.app.get('db')
+
+    NotesService.getNoteById(knexInstance, id)
       .then(returnObject => {
-          return res.json(serializeBookmark(returnObject))
+        return res.json(serializeNote(returnObject))
       })
       .catch(next)
-      
-    })
-    .delete((req, res, next) => {
-      const { id } = req.params;
-      const knexInstance = req.app.get('db')
 
-      BookmarksService.deleteBookmark(knexInstance, id)
+  })
+  .delete((req, res, next) => {
+    const { id } = req.params;
+    const knexInstance = req.app.get('db')
+
+    NotesService.deleteNote(knexInstance, id)
       .then(returnObject => {
-          return res.json(serializeBookmark(returnObject))
+        return res.json(serializeNote(returnObject))
       })
       .catch(next)
-    })
+  })
 
-    notesRouter
-    .route('/api/bookmarks/:id')
-    .patch(bodyParser, (req, res, next) => {
-      console.log(req.body)
-      const { id, title, url, rating, description } = req.body;
-      const parsedRating = parseInt(rating);
-      const parseId = parseInt(id);
-      const knexInstance = req.app.get('db');
-    
-      const patchBookmark = {
-        title: title,
-        rating: rating,
-        url: url,
-        description: description,
-        id: id
-      }
+notesRouter
+  .route('/api/notes/:id')
+  .patch(bodyParser, (req, res, next) => {
+    console.log(req.body)
+    const { id, folderId, content, description } = req.body;
+    const parsedContent = parseInt(content);
+    const parseId = parseInt(id);
+    const knexInstance = req.app.get('db');
 
-      BookmarksService.patchBookmark(knexInstance, patchBookmark)
+    const patchNote = {
+      folderId: folderId,
+      content: content,
+      modified: now()
+    }
+
+    NotesService.patchNote(knexInstance, patchNote)
       .then(returnObject => {
-          return res.json(returnObject)
+        return res.json(returnObject)
       })
       .catch(next)
-      
-    })
+
+  })
 
 
 
