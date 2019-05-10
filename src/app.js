@@ -6,7 +6,7 @@ const helmet = require('helmet')
 const { NODE_ENV } = require('./config')
 
 const notesRouter = require('./notes/notes');
-
+const notesRouter = require('./folders/folder');
 const app = express()
 
 const morganOption = (NODE_ENV === 'production')
@@ -16,6 +16,11 @@ const morganOption = (NODE_ENV === 'production')
 app.use(morgan(morganOption))
 app.use(cors())
 app.use(helmet())
+
+
+app.use(notesRouter);
+app.use(folderRouter);
+
 
 app.use(function errorHandler(error, req, res, next) {
      let response
